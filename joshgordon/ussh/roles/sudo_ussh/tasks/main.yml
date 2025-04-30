@@ -1,0 +1,54 @@
+---
+# tasks file for sudo-ussh
+
+- name: Make sure the destination directory exists
+  ansible.builtin.file:
+    path: /usr/local/lib/{{ ansible_architecture }}-linux-gnu/security
+    state: directory
+    owner: root
+    mode: '0755'
+
+- name: Copy pam-ussh.so to remote system
+  copy:
+    src: pam_ussh_{{ ansible_architecture }}.so
+    dest: /usr/local/lib/{{ ansible_architecture }}-linux-gnu/security/pam-ussh.so
+    owner: root
+    group: root
+    mode: '0755'
+  tags: copy
+
+- name: configure pam to use pam-ussh.so for sudo
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/{{ item }}
+    state: present
+    regexp: 'auth sufficient.*pam.ussh.so.*'
+    line: 'auth sufficient /usr/local/lib/{{ ansible_architecture }}-linux-gnu/security/pam-ussh.so'
+    insertafter: '#%PAM-1.0'
+  with_items:
+    - sudo
+    - sudo-i
+  ignore_errors: true
+
+- name: Copy trusted ssh CA to host system
+  ansible.builtin.copy:
+    dest: /etc/ssh/trusted_user_ca
+    content: 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOZfPJBwBtTyb5L+upnYL/bynV3W23gSRvIOAmVAbTA2JwtCqOzVzSGOUG5HNvjCS5yEuvK4hCx3zoEmgzMmWQc='
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Find /etc/sudoers.d/ files
+  ansible.builtin.find:
+    paths:
+    - /etc/sudoers.d/
+  register: sudoers
+
+- name: Remove NOPASSWD from sudoers files
+  ansible.builtin.replace:
+    path: '{{ item.path }}'
+    regexp: '^([^#].*?)\s*NOPASSWD\s*:(.*)?'
+    replace: '\g<1> \g<2>'
+    validate: /usr/sbin/visudo -cf %s
+  with_items:
+  - path: /etc/sudoers
+  - '{{ sudoers.files }}'
