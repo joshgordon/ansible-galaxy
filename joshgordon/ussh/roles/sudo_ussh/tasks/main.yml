@@ -32,7 +32,7 @@
 - name: Copy trusted ssh CA to host system
   ansible.builtin.copy:
     dest: /etc/ssh/trusted_user_ca
-    content: 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOZfPJBwBtTyb5L+upnYL/bynV3W23gSRvIOAmVAbTA2JwtCqOzVzSGOUG5HNvjCS5yEuvK4hCx3zoEmgzMmWQc='
+    content: '{{ ssh_ca }}'
     owner: root
     group: root
     mode: '0644'

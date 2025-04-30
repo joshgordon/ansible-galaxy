@@ -1,2 +1,3 @@
 ---
 # defaults file for sudo-ussh
+ssh_ca: ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOZfPJBwBtTyb5L+upnYL/bynV3W23gSRvIOAmVAbTA2JwtCqOzVzSGOUG5HNvjCS5yEuvK4hCx3zoEmgzMmWQc=
